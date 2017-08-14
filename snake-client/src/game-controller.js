@@ -11,7 +11,7 @@ const GameController = function () {
     //进入游戏界面
     let gameWorld = GameWorld();
     gameWorld.init();
-    Director.sharedDirector().runningWorld(gameWorld);
+    Director.sharedDirector().replaceWorld(gameWorld);
   };
 
 

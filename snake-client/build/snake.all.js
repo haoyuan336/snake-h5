@@ -9014,7 +9014,7 @@
 /* 330 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
@@ -9026,7 +9026,13 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var res = {};
+	var res = {
+	  "background_3": "ui/background_3.png",
+	  "bq04": "ui/bq04.png",
+	  "bq05": "ui/bq05.png",
+	  "direction_1": "ui/direction_1.png",
+	  "direction_2": "ui/direction_2.png"
+	};
 	for (var i in res) {
 	  res[i] = _gameDefines2.default.resPath + res[i];
 	}
@@ -14006,7 +14012,7 @@
 	 * Created by chuhaoyuan on 2017/8/14.
 	 */
 	var defines = {};
-	defines.resPath = "./assets";
+	defines.resPath = "./assets/";
 	defines.fontList = [];
 	defines.Canvas = {
 	  width: 754,
@@ -14048,7 +14054,7 @@
 	    //进入游戏界面
 	    var gameWorld = (0, _gameWorld2.default)();
 	    gameWorld.init();
-	    _imports.Director.sharedDirector().runningWorld(gameWorld);
+	    _imports.Director.sharedDirector().replaceWorld(gameWorld);
 	  };
 	
 	  return that;
@@ -14072,11 +14078,12 @@
 	
 	var _global2 = _interopRequireDefault(_global);
 	
+	var _gameLayer2 = __webpack_require__(378);
+	
+	var _gameLayer3 = _interopRequireDefault(_gameLayer2);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	/**
-	 * Created by chuhaoyuan on 2017/8/14.
-	 */
 	var GameWorld = function GameWorld() {
 	  var that = (0, _imports.Inherited)((0, _imports.BaseWorld)());
 	  that.inheritOn("init", function () {
@@ -14085,8 +14092,14 @@
 	
 	  _global2.default.socket = io("localhost:3000");
 	
+	  var _gameLayer = (0, _gameLayer3.default)();
+	  _gameLayer.init(_gameLayer);
+	  _gameLayer.add2World(that);
+	
 	  _global2.default.socket.on("sync_data", function (data) {
 	    console.log("同步消息" + JSON.stringify(data));
+	    _global2.default.playerData.uid = data.uid;
+	    _gameLayer.syncData(data.data);
 	  });
 	
 	  that.inheritOn('destroy', function () {
@@ -14094,8 +14107,144 @@
 	  });
 	
 	  return that;
-	};
+	}; /**
+	    * Created by chuhaoyuan on 2017/8/14.
+	    */
 	exports.default = GameWorld;
+
+/***/ },
+/* 378 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _imports = __webpack_require__(331);
+	
+	var _mapLayer2 = __webpack_require__(379);
+	
+	var _mapLayer3 = _interopRequireDefault(_mapLayer2);
+	
+	var _playerNode = __webpack_require__(380);
+	
+	var _playerNode2 = _interopRequireDefault(_playerNode);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var GameLayer = function GameLayer() {
+	  var that = (0, _imports.Inherited)((0, _imports.BaseLayer)());
+	  that.inheritOn('init', function () {
+	    return true;
+	  });
+	  var _event = (0, _imports.Eventuality)({});
+	  var _playerList = [];
+	  var _mapLayer = (0, _mapLayer3.default)({ event: _event });
+	  _mapLayer.init();
+	  that.node.addChild(_mapLayer.node);
+	
+	  that.syncData = function (data) {
+	    //同步数据
+	    for (var i = 0; i < data.length; i++) {
+	      createPlayer(data[i]);
+	    }
+	  };
+	
+	  var createPlayer = function createPlayer(data) {
+	    data.event = _event;
+	    var player = (0, _playerNode2.default)(data);
+	    player.init();
+	    _mapLayer.node.addChild(player.node);
+	    _playerList.push(player);
+	  };
+	
+	  that.inheritOn('update', function (dt) {
+	    for (var i in _playerList) {
+	      _playerList[i].update(dt);
+	    }
+	  });
+	
+	  return that;
+	}; /**
+	    * Created by chuhaoyuan on 2017/8/14.
+	    */
+	exports.default = GameLayer;
+
+/***/ },
+/* 379 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _imports = __webpack_require__(331);
+	
+	var MapLayer = function MapLayer(spec) {
+	  var that = (0, _imports.Inherited)((0, _imports.BaseLayer)());
+	
+	  var _event = spec.event;
+	  return that;
+	}; /**
+	    * Created by chuhaoyuan on 2017/8/14.
+	    */
+	exports.default = MapLayer;
+
+/***/ },
+/* 380 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _imports = __webpack_require__(331);
+	
+	var _global = __webpack_require__(373);
+	
+	var _global2 = _interopRequireDefault(_global);
+	
+	var _resources = __webpack_require__(330);
+	
+	var _resources2 = _interopRequireDefault(_resources);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var PlayerNode = function PlayerNode(spec) {
+	  var that = (0, _imports.Inherited)((0, _imports.BaseLayer)());
+	  var _uid = spec.uid;
+	  var _event = spec.event;
+	  var imageStr = "";
+	  if (_global2.default.playerData.uid === spec.uid) {
+	    imageStr = _resources2.default.bq04;
+	  } else {
+	    imageStr = _resources2.default.bq05;
+	  };
+	  var _head = PIXI.Sprite.fromImage(imageStr);
+	  that.node.addChild(_head);
+	  _head.position = spec.position;
+	
+	  that.inheritOn("init", function () {
+	    return true;
+	  });
+	
+	  that.update = function (dt) {
+	    if (_uid === _global2.default.playerData.uid) {
+	      _event.fire("update_player_position", _head.position);
+	    }
+	  };
+	
+	  return that;
+	}; /**
+	    * Created by chuhaoyuan on 2017/8/14.
+	    */
+	exports.default = PlayerNode;
 
 /***/ }
 /******/ ]);

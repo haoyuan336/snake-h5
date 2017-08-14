@@ -2,7 +2,7 @@
  * Created by chuhaoyuan on 2017/8/14.
  */
 const defines = {};
-defines.resPath = "./assets";
+defines.resPath = "./assets/";
 defines.fontList = [];
 defines.Canvas = {
   width: 754,
