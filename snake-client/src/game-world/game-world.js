@@ -19,7 +19,11 @@ const GameWorld = function () {
   global.socket.on("sync_data", function (data) {
     console.log("同步消息" + JSON.stringify(data));
     global.playerData.uid = data.uid;
+    console.log("global player data = " + global.playerData.uid);
     _gameLayer.syncData(data.data);
+  });
+  global.socket.on("create_player", function (data) {
+    _gameLayer.addPlayer(data);
   });
 
   that.inheritOn('destroy', function () {

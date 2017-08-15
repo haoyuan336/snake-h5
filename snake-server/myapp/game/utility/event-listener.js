@@ -1,32 +1,46 @@
 /**
  * Created by chuhaoyuan on 2017/8/14.
  */
-const EventListener = function (obj) {
+const EventListener = function () {
   var register = {};
+  var that = {};
 
-  obj.on = function (name, method) {
+  that.on = function (name, method) {
     if (!register.hasOwnProperty(name)){
        register[name] = [];
     }
     register[name].push(method);
+    return this;
   };
-  obj.fire = function (name) {
+  that.fire = function (name) {
 
     if (register.hasOwnProperty(name)){
-      var handler = register[name];
-
-      for (var i = 0 ; i < handler.length ; i ++){
+      var handlerList = register[name];
+      for (var i = 0 ; i < handlerList.length ; i ++){
+        var handler = handlerList[i];
         var args = [];
-        for (var j = 1 ; j < arguments.length ; i ++){
+        for (var j = 1 ; j < arguments.length ; j ++){
           args.push(arguments[j]);
         }
-        handler[name].call(this, args);
+        handler.apply(this,args);
+      }
+    }
+    return this;
+  };
+  that.removeListenerWithName = function (name, method) {
+
+    if (register.hasOwnProperty(name)){
+      var handlerList = register[name];
+      for (var i = 0 ; i < handlerList.length ; i ++){
+        if (handlerList[i] === method){
+          handlerList.splice(i ,1);
+        }
       }
     }
   };
-  obj.removeAllListener = function () {
+  that.removeAllListener = function () {
     register = [];
   };
-  return obj;
+  return that;
 };
 module.exports = EventListener;

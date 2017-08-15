@@ -20,7 +20,7 @@ const Eventuality = function (obj) {
         }
 
         return this;
-    }
+    };
 
     obj.on = function (type, method) {
         if (registry.hasOwnProperty(type)) {
@@ -31,7 +31,7 @@ const Eventuality = function (obj) {
         }
 
         return this;
-    }
+    };
 
     obj.removeListener = function (type, method) {
         if (!registry.hasOwnProperty(type)) {

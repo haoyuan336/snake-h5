@@ -38,6 +38,9 @@ const GameLayer  = function () {
       _playerList[i].update(dt);
     }
   });
+  that.addPlayer = function (data) {
+    createPlayer(data);
+  };
 
   return that;
 };

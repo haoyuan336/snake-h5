@@ -10,15 +10,38 @@ const Player = function (id , socket,event) {
     x: Math.random() * 754,
     y: Math.random() * 480
   };
-  _event.on("create_player", function (data) {
-    console.log("create player data " + JSON.stringify(data));
+
+  _socket.on("disconnect", function () {
+    console.log("玩家退出游戏");
+    _event.fire("disconnect",_uid);
+
+    // _event.removeListenerWithName('player_offline', playerOffLine);
+
   });
+
+
+
+  _event.on("create_player", function (pl) {
+    _socket.emit("create_player", {
+      uid: pl.getUid(),
+      position: pl.getPosition()
+    })
+  });
+
+  const playerOffLine = function (uid) {
+    _socket.emit("player_offline", uid);
+  };
+
+
+  _event.on("player_offline", playerOffLine);
+
+
 
   that.syncData = function (playerList) {
     var list = [];
     for (var i = 0 ; i < playerList.length ; i ++){
       list.push({
-        id: playerList[i].getUid(),
+        uid: playerList[i].getUid(),
         position: playerList[i].getPosition()
       });
     }
@@ -32,7 +55,7 @@ const Player = function (id , socket,event) {
   };
   that.getPosition = function () {
     return _position;
-  }
+  };
   return that;
 };
 module.exports = Player;
