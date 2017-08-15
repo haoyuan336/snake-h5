@@ -20,9 +20,22 @@ const GameServer = function (http) {
       }
     }
     _roomList[_roomList.length - 1].createPlayer(id, socket);
-
-
   });
+
+
+  var disTime = new Date().getTime();
+  const update = function () {
+   var nowTime = new Date().getTime();
+    var dt = nowTime - disTime;
+    disTime = nowTime;
+    // console.log("dt" + dt);
+    for (var i = 0 ; i < _roomList.length ; i ++){
+      _roomList[i].update(dt);
+    }
+    setTimeout(update, 1000 / 60);
+  };
+  update();
+
   return that;
 };
 module.exports = GameServer;

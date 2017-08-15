@@ -36,6 +36,22 @@ const PlayerNode = function (spec) {
 
 
 
+
+  const updatePositionInfo = function (data) {
+    let time = data.time;
+    let list = data.data;
+    for (var i = 0 ; i < list.length ; i ++){
+      var playerData = list[i];
+      if (playerData.uid === _uid){
+        // console.log("更新位置" + JSON.stringify(_head.position));
+        // _head.position = playerData.position;
+      }
+    }
+  };
+
+  _event.on("update_position_info", updatePositionInfo);
+
+
   return that;
 };
 export default PlayerNode;

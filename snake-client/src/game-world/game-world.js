@@ -25,6 +25,9 @@ const GameWorld = function () {
   global.socket.on("create_player", function (data) {
     _gameLayer.addPlayer(data);
   });
+  global.socket.on("update_position_info", function (data) {
+    _gameLayer.updatePositionInfo(data);
+  });
 
   that.inheritOn('destroy', function () {
     //

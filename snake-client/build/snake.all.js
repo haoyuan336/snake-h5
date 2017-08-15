@@ -14105,6 +14105,9 @@
 	  _global2.default.socket.on("create_player", function (data) {
 	    _gameLayer.addPlayer(data);
 	  });
+	  _global2.default.socket.on("update_position_info", function (data) {
+	    _gameLayer.updatePositionInfo(data);
+	  });
 	
 	  that.inheritOn('destroy', function () {
 	    //
@@ -14136,6 +14139,14 @@
 	
 	var _playerNode2 = _interopRequireDefault(_playerNode);
 	
+	var _joyStrick2 = __webpack_require__(381);
+	
+	var _joyStrick3 = _interopRequireDefault(_joyStrick2);
+	
+	var _global = __webpack_require__(374);
+	
+	var _global2 = _interopRequireDefault(_global);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var GameLayer = function GameLayer() {
@@ -14146,8 +14157,17 @@
 	  var _event = (0, _imports.Eventuality)({});
 	  var _playerList = [];
 	  var _mapLayer = (0, _mapLayer3.default)({ event: _event });
+	  var _sendDirectionTime = 0;
 	  _mapLayer.init();
 	  that.node.addChild(_mapLayer.node);
+	
+	  var _joyStrick = (0, _joyStrick3.default)();
+	  _joyStrick.node.position = {
+	    x: _imports.Director.sharedDirector().width - 100,
+	    y: _imports.Director.sharedDirector().height - 100
+	  };
+	  _joyStrick.init();
+	  that.node.addChild(_joyStrick.node);
 	
 	  that.syncData = function (data) {
 	    //同步数据
@@ -14168,9 +14188,26 @@
 	    for (var i in _playerList) {
 	      _playerList[i].update(dt);
 	    }
+	    if (_sendDirectionTime > dt * 10) {
+	      // console.log("发送 方向 的 时间");
+	      _sendDirectionTime = 0;
+	
+	      if (_joyStrick.getDirection().x !== 0 || _joyStrick.getDirection().y !== 0) {
+	        _global2.default.socket.emit("direction", _joyStrick.getDirection());
+	      }
+	    } else {
+	      _sendDirectionTime += dt;
+	    }
 	  });
+	
 	  that.addPlayer = function (data) {
 	    createPlayer(data);
+	  };
+	
+	  that.updatePositionInfo = function (data) {
+	    //更新玩家的位置信息
+	    // console.log("update position info = " + JSON.stringify(data));
+	    _event.fire("update_position_info", data);
 	  };
 	
 	  return that;
@@ -14259,11 +14296,107 @@
 	    }
 	  };
 	
+	  var updatePositionInfo = function updatePositionInfo(data) {
+	    var time = data.time;
+	    var list = data.data;
+	    for (var i = 0; i < list.length; i++) {
+	      var playerData = list[i];
+	      if (playerData.uid === _uid) {
+	        // console.log("更新位置" + JSON.stringify(_head.position));
+	        // _head.position = playerData.position;
+	      }
+	    }
+	  };
+	
+	  _event.on("update_position_info", updatePositionInfo);
+	
 	  return that;
 	}; /**
 	    * Created by chuhaoyuan on 2017/8/14.
 	    */
 	exports.default = PlayerNode;
+
+/***/ },
+/* 381 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _imports = __webpack_require__(330);
+	
+	var _resources = __webpack_require__(372);
+	
+	var _resources2 = _interopRequireDefault(_resources);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/**
+	 * Created by chuhaoyuan on 2017/8/15.
+	 */
+	var JoyStrick = function JoyStrick() {
+	  var that = (0, _imports.Inherited)((0, _imports.BaseLayer)());
+	  var _direction = {
+	    x: 0,
+	    y: 0
+	  };
+	  that.inheritOn('init', function () {
+	    return true;
+	  });
+	  that.update = function (dt) {};
+	
+	  var _bg = PIXI.Sprite.fromImage(_resources2.default.direction_1);
+	  that.node.addChild(_bg);
+	  _bg.anchor.set(0.5);
+	  _bg.scale = {
+	    x: 2,
+	    y: 2
+	  };
+	  _bg.alpha = 0;
+	  _bg.interactive = true;
+	
+	  var _joyStrickBg = PIXI.Sprite.fromImage(_resources2.default.direction_1);
+	  that.node.addChild(_joyStrickBg);
+	  _joyStrickBg.anchor.set(0.5);
+	  var _joyStrick = PIXI.Sprite.fromImage(_resources2.default.direction_2);
+	  that.node.addChild(_joyStrick);
+	  _joyStrick.anchor.set(0.5);
+	
+	  var touchBegan = function touchBegan(event) {
+	    moveToCurrentPos(event.data.getLocalPosition(that.node));
+	  };
+	  var touchMove = function touchMove(event) {
+	    moveToCurrentPos(event.data.getLocalPosition(that.node));
+	  };
+	  var touchEnd = function touchEnd(event) {
+	    moveToCurrentPos(_joyStrickBg.position);
+	  };
+	
+	  var moveToCurrentPos = function moveToCurrentPos(pos) {
+	    // _joyStrick.position = pos;
+	    var touchPos = (0, _imports.Vec2)(pos.x, pos.y);
+	    var bgPos = (0, _imports.Vec2)(_joyStrickBg.position.x, _joyStrickBg.position.y);
+	    if (touchPos.getDistance(bgPos) > _joyStrickBg.width * 0.5) {
+	      _joyStrick.position = touchPos.sub(bgPos).getNormal().multValue(_joyStrickBg.width * 0.5);
+	    } else {
+	      _joyStrick.position = pos;
+	    }
+	    _direction = touchPos.sub(bgPos).getNormal();
+	  };
+	
+	  _bg.on('pointerdown', touchBegan).on('pointerup', touchEnd).on('pointerupoutside', touchEnd).on('pointermove', touchMove);
+	
+	  that.getDirection = function () {
+	
+	    return _direction;
+	  };
+	
+	  return that;
+	};
+	exports.default = JoyStrick;
 
 /***/ }
 /******/ ]);

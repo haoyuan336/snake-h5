@@ -7,6 +7,7 @@ const Room = function () {
   var that = {};
   var _playerList = [];
   var _event = EventListener({});
+  var _sendPosInfoTime = 0;
   that.getPlayerCount = function () {
     return _playerList.length;
   };
@@ -24,9 +25,40 @@ const Room = function () {
         _playerList.splice(i ,1)
       }
     }
+    console.log("当前的玩家个数" + _playerList.length);
     _event.fire("player_offline", uid);
   });
 
+  that.update = function (dt) {
+
+    for (var i in _playerList){
+      _playerList[i].update(dt);
+    }
+
+    if (_sendPosInfoTime > dt * 10){
+      _sendPosInfoTime = 0;
+      //每10帧发送一次位置信息
+      sendPositionInfo();
+    }else {
+      _sendPosInfoTime += dt;
+    }
+
+  };
+
+
+  const sendPositionInfo = function () {
+    var posList = [];
+    for (var i = 0 ; i < _playerList.length ; i ++){
+      posList.push({
+        uid: _playerList[i].getUid(),
+        position: _playerList[i].getPosition()
+      })
+    }
+    _event.fire("update_position_info", {
+      time: new Date().getTime(),
+      data: posList
+    })
+  };
 
   return that;
 };
