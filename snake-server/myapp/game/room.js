@@ -35,9 +35,9 @@ const Room = function () {
       _playerList[i].update(dt);
     }
 
-    if (_sendPosInfoTime > dt * 10){
+    if (_sendPosInfoTime > dt * 2){
       _sendPosInfoTime = 0;
-      //每10帧发送一次位置信息
+      //每2帧发送一次位置信息
       sendPositionInfo();
     }else {
       _sendPosInfoTime += dt;
@@ -51,7 +51,8 @@ const Room = function () {
     for (var i = 0 ; i < _playerList.length ; i ++){
       posList.push({
         uid: _playerList[i].getUid(),
-        position: _playerList[i].getPosition()
+        position: _playerList[i].getPosition(),
+        direction: _playerList[i].getDirection()
       })
     }
     _event.fire("update_position_info", {

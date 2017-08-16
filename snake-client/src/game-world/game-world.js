@@ -10,7 +10,7 @@ const GameWorld = function () {
     return true;
   });
 
-  global.socket = io("localhost:3000");
+  global.socket = io("192.168.31.190:3000");
 
   var _gameLayer = GameLayer();
   _gameLayer.init(_gameLayer);
@@ -27,6 +27,9 @@ const GameWorld = function () {
   });
   global.socket.on("update_position_info", function (data) {
     _gameLayer.updatePositionInfo(data);
+  });
+  global.socket.on("player_offline", function (uid) {
+    _gameLayer.playerOffLine(uid);
   });
 
   that.inheritOn('destroy', function () {

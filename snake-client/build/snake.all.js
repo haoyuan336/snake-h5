@@ -14090,7 +14090,7 @@
 	    return true;
 	  });
 	
-	  _global2.default.socket = io("localhost:3000");
+	  _global2.default.socket = io("192.168.31.190:3000");
 	
 	  var _gameLayer = (0, _gameLayer3.default)();
 	  _gameLayer.init(_gameLayer);
@@ -14107,6 +14107,9 @@
 	  });
 	  _global2.default.socket.on("update_position_info", function (data) {
 	    _gameLayer.updatePositionInfo(data);
+	  });
+	  _global2.default.socket.on("player_offline", function (uid) {
+	    _gameLayer.playerOffLine(uid);
 	  });
 	
 	  that.inheritOn('destroy', function () {
@@ -14200,6 +14203,17 @@
 	    }
 	  });
 	
+	  that.playerOffLine = function (uid) {
+	
+	    for (var i = 0; i < _playerList.length; i++) {
+	      if (_playerList[i].getUid() === uid) {
+	        _playerList.splice(i, 1);
+	      }
+	    }
+	
+	    _event.fire("player_offline", uid);
+	  };
+	
 	  that.addPlayer = function (data) {
 	    createPlayer(data);
 	  };
@@ -14220,7 +14234,7 @@
 /* 379 */
 /***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
@@ -14228,8 +14242,20 @@
 	
 	var _imports = __webpack_require__(330);
 	
+	var _resources = __webpack_require__(372);
+	
+	var _resources2 = _interopRequireDefault(_resources);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/**
+	 * Created by chuhaoyuan on 2017/8/14.
+	 */
 	var MapLayer = function MapLayer(spec) {
 	  var that = (0, _imports.Inherited)((0, _imports.BaseLayer)());
+	
+	  var _bg = PIXI.extras.TilingSprite.fromImage(_resources2.default.background_3, 10000, 10000);
+	  that.node.addChild(_bg);
 	
 	  var _event = spec.event;
 	  _event.on("update_player_position", function (position) {
@@ -14239,10 +14265,9 @@
 	      y: _imports.Director.sharedDirector().height * 0.5 - position.y
 	    };
 	  });
+	
 	  return that;
-	}; /**
-	    * Created by chuhaoyuan on 2017/8/14.
-	    */
+	};
 	exports.default = MapLayer;
 
 /***/ },
@@ -14271,10 +14296,11 @@
 	  console.log("spec = " + JSON.stringify(spec));
 	  var that = (0, _imports.Inherited)((0, _imports.BaseLayer)());
 	  var _uid = spec.uid;
-	  console.log("uid = " + _uid);
-	  console.log("player uid = " + _global2.default.playerData.uid);
+	  // var _parent = spec.parent;
 	  var _event = spec.event;
 	  var imageStr = "";
+	  var _targetPos = undefined;
+	  var _reciveMessageTime = 0;
 	  if (_global2.default.playerData.uid === spec.uid) {
 	    imageStr = _resources2.default.bq04;
 	  } else {
@@ -14285,31 +14311,65 @@
 	  _head.position = spec.position;
 	  _head.anchor.set(0.5);
 	
+	  var _debugHead = PIXI.Sprite.fromImage(imageStr);
+	  that.node.addChild(_debugHead);
+	  _debugHead.position = spec.position;
+	  _debugHead.anchor.set(0.5);
+	  _debugHead.alpha = 0;
+	
 	  that.inheritOn("init", function () {
 	    return true;
 	  });
 	
 	  that.update = function (dt) {
 	    if (_uid === _global2.default.playerData.uid) {
-	      // console.log("更新地图位置");
+	      // console.log("更新地图位置" + _uid);
 	      _event.fire("update_player_position", _head.position);
+	    }
+	    if (_targetPos !== undefined) {
+	      var dis = (0, _imports.Vec2)(_head.position.x, _head.position.y).getDistance((0, _imports.Vec2)(_targetPos.x, _targetPos.y));
+	      var direction = (0, _imports.Vec2)(_targetPos.x, _targetPos.y).sub((0, _imports.Vec2)(_head.position.x, _head.position.y)).getNormal();
+	      _head.position = (0, _imports.Vec2)(_head.position.x, _head.position.y).add(direction.multValue(dis * 0.05));
+	      _head.rotation = -direction.getRadians((0, _imports.Vec2)(0, -1));
 	    }
 	  };
 	
 	  var updatePositionInfo = function updatePositionInfo(data) {
+	    _reciveMessageTime = 0; //一旦收到服务器数据， 这个值就是0；
 	    var time = data.time;
 	    var list = data.data;
+	    var nowTime = new Date().getTime();
+	    var disTime = nowTime - time;
 	    for (var i = 0; i < list.length; i++) {
 	      var playerData = list[i];
 	      if (playerData.uid === _uid) {
-	        // console.log("更新位置" + JSON.stringify(_head.position));
-	        // _head.position = playerData.position;
+	        var position = playerData.position;
+	        var direction = playerData.direction;
+	        _targetPos = (0, _imports.Vec2)(position.x, position.y).add((0, _imports.Vec2)(direction.x, direction.y).multValue(disTime * 0.2));
+	        _debugHead.position = _targetPos;
 	      }
 	    }
 	  };
 	
 	  _event.on("update_position_info", updatePositionInfo);
 	
+	  var playerOffline = function playerOffline(uid) {
+	    if (_uid === uid) {
+	      that.removeFromParent();
+	    }
+	  };
+	  _event.on("player_offline", playerOffline);
+	
+	  that.removeFromParent = function () {
+	    _head.parent.removeChild(_head);
+	    _debugHead.parent.removeChild(_debugHead);
+	    _event.removeListener("player_offline", playerOffline);
+	    _event.removeListener("update_position_info", updatePositionInfo);
+	  };
+	
+	  that.getUid = function () {
+	    return _uid;
+	  };
 	  return that;
 	}; /**
 	    * Created by chuhaoyuan on 2017/8/14.

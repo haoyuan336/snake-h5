@@ -60,6 +60,16 @@ const GameLayer  = function () {
     }
   });
 
+  that.playerOffLine = function (uid) {
+
+    for (var i = 0 ; i < _playerList.length ; i ++){
+      if (_playerList[i].getUid() === uid){
+        _playerList.splice(i, 1);
+      }
+    }
+
+    _event.fire("player_offline", uid);
+  };
 
 
   that.addPlayer = function (data) {

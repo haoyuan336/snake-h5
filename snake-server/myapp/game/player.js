@@ -7,14 +7,12 @@ const Player = function (id , socket,event) {
   var _uid = id;
   var _socket = socket;
   var _event = event;
+  var _length = 100;
   var _position = {
     x: Math.random() * 754,
     y: Math.random() * 480
   };
-  var _direction = {
-    x: Math.random(),
-    y: Math.random()
-  };
+  var _direction = Vec2(Math.random() * 100, Math.random() * 100).getNormal();
   _socket.on("disconnect", function () {
     console.log("玩家退出游戏");
     _event.fire("disconnect",_uid);
@@ -22,7 +20,8 @@ const Player = function (id , socket,event) {
 
   _socket.on("direction", function (direction) {
     //收到方向
-    console.log("收到客户端发来的方向" + JSON.stringify(direction));
+    // console.log("收到客户端发来的方向" + JSON.stringify(direction));
+    _direction = direction;
   });
   _event.on("create_player", function (pl) {
     _socket.emit("create_player", {
@@ -60,11 +59,18 @@ const Player = function (id , socket,event) {
   that.getPosition = function () {
     return _position;
   };
+  that.getDirection = function () {
+    return _direction;
+  };
+  that.getLendth = function () {
+    return _length;
+  }
   that.update = function (dt) {
 
-    _position = Vec2(_position.x, _position.y).add(Vec2(_direction.x, _direction.y));
+    _position = Vec2(_position.x, _position.y).add(Vec2(_direction.x, _direction.y).multValue(dt * 0.2));
 
   };
+
   return that;
 };
 module.exports = Player;
