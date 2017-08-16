@@ -52,7 +52,9 @@ const Room = function () {
       posList.push({
         uid: _playerList[i].getUid(),
         position: _playerList[i].getPosition(),
-        direction: _playerList[i].getDirection()
+        direction: _playerList[i].getDirection(),
+        bezier: _playerList[i].getBezier(),
+        pointList: _playerList[i].getPointList()
       })
     }
     _event.fire("update_position_info", {

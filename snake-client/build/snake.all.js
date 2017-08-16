@@ -8939,19 +8939,19 @@
 	
 	var _imports = __webpack_require__(330);
 	
-	var _resources = __webpack_require__(372);
+	var _resources = __webpack_require__(373);
 	
 	var _resources2 = _interopRequireDefault(_resources);
 	
-	var _global = __webpack_require__(374);
+	var _global = __webpack_require__(375);
 	
 	var _global2 = _interopRequireDefault(_global);
 	
-	var _gameController = __webpack_require__(376);
+	var _gameController = __webpack_require__(377);
 	
 	var _gameController2 = _interopRequireDefault(_gameController);
 	
-	var _gameDefines = __webpack_require__(373);
+	var _gameDefines = __webpack_require__(374);
 	
 	var _gameDefines2 = _interopRequireDefault(_gameDefines);
 	
@@ -9019,7 +9019,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.Action = exports.Vector = exports.Vec2 = exports.AsyncRequest = exports.SRequest = exports.Director = exports.ResourceManager = exports.Helper = exports.Inherited = exports.DelayEvent = exports.Eventuality = exports.ModelLayer = exports.BaseLayer = exports.BaseWorld = exports.UIControl = exports.ActionFactor = exports.AnimationFactor = undefined;
+	exports.Bezier = exports.Action = exports.Vector = exports.Vec2 = exports.AsyncRequest = exports.SRequest = exports.Director = exports.ResourceManager = exports.Helper = exports.Inherited = exports.DelayEvent = exports.Eventuality = exports.ModelLayer = exports.BaseLayer = exports.BaseWorld = exports.UIControl = exports.ActionFactor = exports.AnimationFactor = undefined;
 	
 	var _animationFactor = __webpack_require__(331);
 	
@@ -9089,7 +9089,15 @@
 	
 	var _vector2 = _interopRequireDefault(_vector);
 	
+	var _bezierPoint = __webpack_require__(372);
+	
+	var _bezierPoint2 = _interopRequireDefault(_bezierPoint);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/**
+	 * Created by wizard on 16/3/30.
+	 */
 	
 	exports.AnimationFactor = _animationFactor2.default;
 	exports.ActionFactor = _actionFactor2.default;
@@ -9107,9 +9115,8 @@
 	exports.AsyncRequest = _asyncRequest2.default;
 	exports.Vec2 = _vec2.default;
 	exports.Vector = _vector2.default;
-	exports.Action = _action2.default; /**
-	                                    * Created by wizard on 16/3/30.
-	                                    */
+	exports.Action = _action2.default;
+	exports.Bezier = _bezierPoint2.default;
 
 /***/ },
 /* 331 */
@@ -13932,6 +13939,54 @@
 
 /***/ },
 /* 372 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	/**
+	 * Created by chuhaoyuan on 2017/8/16.
+	 */
+	var Bezier = function Bezier(controllerPoints) {
+	  var that = {};
+	  var _controllerPoints = controllerPoints;
+	  that.getPoint = function (t) {
+	    var temp = 1 - t;
+	    var x = void 0,
+	        y = undefined;
+	    if (t === 0) {
+	      x = _controllerPoints[0].x * Math.pow(temp, _controllerPoints.length - 1);
+	      y = _controllerPoints[0].x * Math.pow(temp, _controllerPoints.length - 1);
+	    } else if (t != 0 && t != 1) {}
+	
+	    for (var i = 1; i < _controllerPoints.length - 1; i++) {
+	      var point = _controllerPoints[i];
+	      var tempX = point.x * (_controllerPoints.length - 1) * Math.pow(t, i) * Math.pow(temp, _controllerPoints.length - 1 - i);
+	      x += tempX;
+	      var tempY = point.y * (_controllerPoints.length - 1) * Math.pow(t, i) * Math.pow(temp, _controllerPoints.length - 1 - i);
+	      y += tempY;
+	    };
+	    x += _controllerPoints[_controllerPoints.length - 1].x * Math.pow(t, _controllerPoints.length - 1);
+	    y += _controllerPoints[_controllerPoints.length - 1].y * Math.pow(t, _controllerPoints.length - 1);
+	    return {
+	      x: x,
+	      y: y
+	    };
+	  };
+	  that.getStartPos = function () {
+	    return _controllerPoints[0];
+	  };
+	  that.getEndPos = function () {
+	    return _controllerPoints[_controllerPoints.length - 1];
+	  };
+	  return that;
+	};
+	exports.default = Bezier;
+
+/***/ },
+/* 373 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -13940,7 +13995,7 @@
 	  value: true
 	});
 	
-	var _gameDefines = __webpack_require__(373);
+	var _gameDefines = __webpack_require__(374);
 	
 	var _gameDefines2 = _interopRequireDefault(_gameDefines);
 	
@@ -13959,7 +14014,7 @@
 	exports.default = res;
 
 /***/ },
-/* 373 */
+/* 374 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -13986,7 +14041,7 @@
 	exports.default = defines;
 
 /***/ },
-/* 374 */
+/* 375 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -13995,7 +14050,7 @@
 	  value: true
 	});
 	
-	var _playerData = __webpack_require__(375);
+	var _playerData = __webpack_require__(376);
 	
 	var _playerData2 = _interopRequireDefault(_playerData);
 	
@@ -14009,7 +14064,7 @@
 	exports.default = global;
 
 /***/ },
-/* 375 */
+/* 376 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -14027,7 +14082,7 @@
 	exports.default = PlayerData;
 
 /***/ },
-/* 376 */
+/* 377 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -14038,7 +14093,7 @@
 	
 	var _imports = __webpack_require__(330);
 	
-	var _gameWorld = __webpack_require__(377);
+	var _gameWorld = __webpack_require__(378);
 	
 	var _gameWorld2 = _interopRequireDefault(_gameWorld);
 	
@@ -14063,7 +14118,7 @@
 	exports.default = gameController;
 
 /***/ },
-/* 377 */
+/* 378 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -14074,11 +14129,11 @@
 	
 	var _imports = __webpack_require__(330);
 	
-	var _global = __webpack_require__(374);
+	var _global = __webpack_require__(375);
 	
 	var _global2 = _interopRequireDefault(_global);
 	
-	var _gameLayer2 = __webpack_require__(378);
+	var _gameLayer2 = __webpack_require__(379);
 	
 	var _gameLayer3 = _interopRequireDefault(_gameLayer2);
 	
@@ -14123,7 +14178,7 @@
 	exports.default = GameWorld;
 
 /***/ },
-/* 378 */
+/* 379 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -14134,19 +14189,19 @@
 	
 	var _imports = __webpack_require__(330);
 	
-	var _mapLayer2 = __webpack_require__(379);
+	var _mapLayer2 = __webpack_require__(380);
 	
 	var _mapLayer3 = _interopRequireDefault(_mapLayer2);
 	
-	var _playerNode = __webpack_require__(380);
+	var _playerNode = __webpack_require__(381);
 	
 	var _playerNode2 = _interopRequireDefault(_playerNode);
 	
-	var _joyStrick2 = __webpack_require__(381);
+	var _joyStrick2 = __webpack_require__(382);
 	
 	var _joyStrick3 = _interopRequireDefault(_joyStrick2);
 	
-	var _global = __webpack_require__(374);
+	var _global = __webpack_require__(375);
 	
 	var _global2 = _interopRequireDefault(_global);
 	
@@ -14231,7 +14286,7 @@
 	exports.default = GameLayer;
 
 /***/ },
-/* 379 */
+/* 380 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -14242,7 +14297,7 @@
 	
 	var _imports = __webpack_require__(330);
 	
-	var _resources = __webpack_require__(372);
+	var _resources = __webpack_require__(373);
 	
 	var _resources2 = _interopRequireDefault(_resources);
 	
@@ -14271,7 +14326,7 @@
 	exports.default = MapLayer;
 
 /***/ },
-/* 380 */
+/* 381 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -14282,11 +14337,11 @@
 	
 	var _imports = __webpack_require__(330);
 	
-	var _global = __webpack_require__(374);
+	var _global = __webpack_require__(375);
 	
 	var _global2 = _interopRequireDefault(_global);
 	
-	var _resources = __webpack_require__(372);
+	var _resources = __webpack_require__(373);
 	
 	var _resources2 = _interopRequireDefault(_resources);
 	
@@ -14310,12 +14365,13 @@
 	  that.node.addChild(_head);
 	  _head.position = spec.position;
 	  _head.anchor.set(0.5);
+	  _head.alpha = 0;
 	
 	  var _debugHead = PIXI.Sprite.fromImage(imageStr);
 	  that.node.addChild(_debugHead);
 	  _debugHead.position = spec.position;
 	  _debugHead.anchor.set(0.5);
-	  _debugHead.alpha = 0;
+	  _debugHead.alpha = 1;
 	
 	  that.inheritOn("init", function () {
 	    return true;
@@ -14340,15 +14396,23 @@
 	    var list = data.data;
 	    var nowTime = new Date().getTime();
 	    var disTime = nowTime - time;
+	
 	    for (var i = 0; i < list.length; i++) {
 	      var playerData = list[i];
 	      if (playerData.uid === _uid) {
 	        var position = playerData.position;
 	        var direction = playerData.direction;
+	        var bezier = playerData.bezier;
+	        var pointList = playerData.pointList;
 	        _targetPos = (0, _imports.Vec2)(position.x, position.y).add((0, _imports.Vec2)(direction.x, direction.y).multValue(disTime * 0.2));
-	        _debugHead.position = _targetPos;
+	        _debugHead.position = position;
+	        renderBezier(bezier);
+	        renderDebugLine(pointList);
 	      }
 	    }
+	
+	    //渲染贝塞尔曲线
+	
 	  };
 	
 	  _event.on("update_position_info", updatePositionInfo);
@@ -14370,6 +14434,49 @@
 	  that.getUid = function () {
 	    return _uid;
 	  };
+	
+	  var graphics = new PIXI.Graphics();
+	
+	  that.node.addChild(graphics);
+	
+	  var debugGra = new PIXI.Graphics();
+	  that.node.addChild(debugGra);
+	  debugGra.lineStyle(20, 0xFF00FF, 0.8);
+	
+	  var renderBezier = function renderBezier(data) {
+	    // console.log("bezier = " + JSON.stringify(data));
+	
+	    graphics.clear();
+	    graphics.lineStyle(10, 0xFF0000, 0.8);
+	    var bezier = (0, _imports.Bezier)(data);
+	
+	    // console.log("bezier")
+	    for (var i = 0; i < 100; i++) {
+	      var point = bezier.getPoint(i * 0.01);
+	      console.log("point = " + JSON.stringify(point));
+	      if (i === 0) {
+	        graphics.moveTo(point.x, point.y);
+	      }
+	      graphics.lineTo(point.x, point.y);
+	      // console.log("point = " + JSON.stringify(point));
+	    }
+	    // graphics.lineTo(_targetPos.x, _targetPos.y);
+	    // var p1 = bezier.getPoint(0);
+	    // var p2 = bezier.getPoint(1);
+	    // console.log("p1 = " + JSON.stringify(p1));
+	    // console.log("p2 = " + JSON.stringify(p2));
+	    // graphics.moveTo(bezier.getStartPos().x, bezier.getStartPos().y);
+	    // graphics.lineTo(bezier.getEndPos().x, bezier.getEndPos().y);
+	    //
+	    // debugGra.moveTo(p1.x, p1.y);
+	    // debugGra.lineTo(p2.x, p2.y);
+	  };
+	
+	  var renderDebugLine = function renderDebugLine(pointList) {
+	    // debugGra.moveTo(pointList[0].x, pointList[0].y);
+	    // debugGra.lineTo(pointList[1].x, pointList[1].y);
+	  };
+	
 	  return that;
 	}; /**
 	    * Created by chuhaoyuan on 2017/8/14.
@@ -14377,7 +14484,7 @@
 	exports.default = PlayerNode;
 
 /***/ },
-/* 381 */
+/* 382 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -14388,7 +14495,7 @@
 	
 	var _imports = __webpack_require__(330);
 	
-	var _resources = __webpack_require__(372);
+	var _resources = __webpack_require__(373);
 	
 	var _resources2 = _interopRequireDefault(_resources);
 	

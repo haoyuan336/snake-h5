@@ -20,6 +20,7 @@ import DelayEvent from './delay-event'
 import Vec2 from './math/vec2'
 import Action from './animation/action'
 import  Vector from './math/vector'
+import Bezier from './math/bezier-point'
 export {
   AnimationFactor,
   ActionFactor,
@@ -37,5 +38,6 @@ export {
   AsyncRequest,
   Vec2,
   Vector,
-  Action
+  Action,
+  Bezier
 }
