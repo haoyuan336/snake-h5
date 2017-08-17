@@ -21,6 +21,7 @@ import Vec2 from './math/vec2'
 import Action from './animation/action'
 import  Vector from './math/vector'
 import Bezier from './math/bezier-point'
+import Line from './math/line'
 export {
   AnimationFactor,
   ActionFactor,
@@ -39,5 +40,6 @@ export {
   Vec2,
   Vector,
   Action,
-  Bezier
+  Bezier,
+  Line
 }

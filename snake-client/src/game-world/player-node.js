@@ -1,7 +1,7 @@
 /**
  * Created by chuhaoyuan on 2017/8/14.
  */
-import {Inherited, BaseLayer, Vec2, Bezier} from './../utility/imports'
+import {Inherited, BaseLayer, Vec2, Bezier, Line} from './../utility/imports'
 import global from './../global'
 import resources from './../resources'
 const PlayerNode = function (spec) {
@@ -12,7 +12,6 @@ const PlayerNode = function (spec) {
   var _event = spec.event;
   let imageStr = "";
   let _targetPos = undefined;
-  let _reciveMessageTime = 0;
   if (global.playerData.uid === spec.uid){
     imageStr = resources.bq04;
   }else {
@@ -53,7 +52,7 @@ const PlayerNode = function (spec) {
 
 
   const updatePositionInfo = function (data) {
-    _reciveMessageTime = 0 ; //一旦收到服务器数据， 这个值就是0；
+    // console.log("data = " + JSON.stringify(data));
     let time = data.time;
     let list = data.data;
     let nowTime = new Date().getTime();
@@ -65,11 +64,12 @@ const PlayerNode = function (spec) {
         var position = playerData.position;
         var direction = playerData.direction;
         var bezier = playerData.bezier;
+        var lineList = playerData.lineList;
         var pointList = playerData.pointList;
         _targetPos = Vec2(position.x, position.y).add(Vec2(direction.x, direction.y).multValue(disTime * 0.2));
         _debugHead.position = position;
         renderBezier(bezier);
-        renderDebugLine(pointList);
+        renderList(lineList);
       }
     }
 
@@ -111,43 +111,55 @@ const PlayerNode = function (spec) {
   debugGra.lineStyle(20, 0xFF00FF, 0.8);
 
 
+  const renderList = function (list) {
+    // console.log("render list = " + JSON.stringify(list));
+    for (let i = 0 ; i < list.length ; i ++){
+      var line = Line(list[i].k, list[i].b);
+      // console.log("line k = " + line.k);
+      // console.log("line b = " + line.b);
+      for (var i = 0 ; i < 40 ; i ++){
+        var x = i * 10;
+        var y = line.getYWithX(x);
+        if ( i === 0){
+          debugGra.moveTo(x, y);
+        }else {
+          debugGra.lineTo(x, y);
+        }
+      }
+    }
+
+  };
   const renderBezier = function (data) {
     // console.log("bezier = " + JSON.stringify(data));
 
     graphics.clear();
     graphics.lineStyle(10, 0xFF0000, 0.8);
-    let bezier = Bezier(data);
+    let bezierPoints = Bezier(data,100);
 
-    // console.log("bezier")
-    for (var i = 0 ; i < 100 ; i ++){
-      let point = bezier.getPoint(i  * 0.01);
-      console.log("point = " + JSON.stringify(point));
+    for (var i = 0 ; i < bezierPoints.length ; i ++){
       if (i === 0){
-        graphics.moveTo(point.x, point.y);
-
+        graphics.moveTo(bezierPoints[i].x, bezierPoints[i].y);
+      }else {
+        graphics.lineTo(bezierPoints[i].x, bezierPoints[i].y);
       }
-      graphics.lineTo(point.x, point.y);
-      // console.log("point = " + JSON.stringify(point));
     }
-    // graphics.lineTo(_targetPos.x, _targetPos.y);
-    // var p1 = bezier.getPoint(0);
-    // var p2 = bezier.getPoint(1);
-    // console.log("p1 = " + JSON.stringify(p1));
-    // console.log("p2 = " + JSON.stringify(p2));
-    // graphics.moveTo(bezier.getStartPos().x, bezier.getStartPos().y);
-    // graphics.lineTo(bezier.getEndPos().x, bezier.getEndPos().y);
+    // console.log("bezier = " + JSON.stringify(bezier));
+    // console.log("bezier")
+    // for (var i = 0 ; i < 100 ; i ++){
+    //   let point = bezier.getPoint(i  * 0.01);
+    //   console.log("point = " + JSON.stringify(point));
+    //   if (i === 0){
+    //     graphics.moveTo(point.x, point.y);
     //
-    // debugGra.moveTo(p1.x, p1.y);
-    // debugGra.lineTo(p2.x, p2.y);
+    //   }
+    //   graphics.lineTo(point.x, point.y);
+    //   // console.log("point = " + JSON.stringify(point));
+    // }
   };
 
 
 
 
-  const renderDebugLine = function (pointList) {
-    // debugGra.moveTo(pointList[0].x, pointList[0].y);
-    // debugGra.lineTo(pointList[1].x, pointList[1].y);
-  };
 
   return that;
 };

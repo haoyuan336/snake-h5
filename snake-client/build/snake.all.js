@@ -9019,7 +9019,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.Bezier = exports.Action = exports.Vector = exports.Vec2 = exports.AsyncRequest = exports.SRequest = exports.Director = exports.ResourceManager = exports.Helper = exports.Inherited = exports.DelayEvent = exports.Eventuality = exports.ModelLayer = exports.BaseLayer = exports.BaseWorld = exports.UIControl = exports.ActionFactor = exports.AnimationFactor = undefined;
+	exports.Line = exports.Bezier = exports.Action = exports.Vector = exports.Vec2 = exports.AsyncRequest = exports.SRequest = exports.Director = exports.ResourceManager = exports.Helper = exports.Inherited = exports.DelayEvent = exports.Eventuality = exports.ModelLayer = exports.BaseLayer = exports.BaseWorld = exports.UIControl = exports.ActionFactor = exports.AnimationFactor = undefined;
 	
 	var _animationFactor = __webpack_require__(331);
 	
@@ -9093,11 +9093,11 @@
 	
 	var _bezierPoint2 = _interopRequireDefault(_bezierPoint);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	var _line = __webpack_require__(383);
 	
-	/**
-	 * Created by wizard on 16/3/30.
-	 */
+	var _line2 = _interopRequireDefault(_line);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	exports.AnimationFactor = _animationFactor2.default;
 	exports.ActionFactor = _actionFactor2.default;
@@ -9117,6 +9117,9 @@
 	exports.Vector = _vector2.default;
 	exports.Action = _action2.default;
 	exports.Bezier = _bezierPoint2.default;
+	exports.Line = _line2.default; /**
+	                                * Created by wizard on 16/3/30.
+	                                */
 
 /***/ },
 /* 331 */
@@ -13949,39 +13952,55 @@
 	/**
 	 * Created by chuhaoyuan on 2017/8/16.
 	 */
-	var Bezier = function Bezier(controllerPoints) {
+	var Bezier = function Bezier(controllerPoints, count) {
 	  var that = {};
 	  var _controllerPoints = controllerPoints;
-	  that.getPoint = function (t) {
-	    var temp = 1 - t;
-	    var x = void 0,
-	        y = undefined;
-	    if (t === 0) {
-	      x = _controllerPoints[0].x * Math.pow(temp, _controllerPoints.length - 1);
-	      y = _controllerPoints[0].x * Math.pow(temp, _controllerPoints.length - 1);
-	    } else if (t != 0 && t != 1) {}
 	
-	    for (var i = 1; i < _controllerPoints.length - 1; i++) {
-	      var point = _controllerPoints[i];
-	      var tempX = point.x * (_controllerPoints.length - 1) * Math.pow(t, i) * Math.pow(temp, _controllerPoints.length - 1 - i);
-	      x += tempX;
-	      var tempY = point.y * (_controllerPoints.length - 1) * Math.pow(t, i) * Math.pow(temp, _controllerPoints.length - 1 - i);
-	      y += tempY;
-	    };
-	    x += _controllerPoints[_controllerPoints.length - 1].x * Math.pow(t, _controllerPoints.length - 1);
-	    y += _controllerPoints[_controllerPoints.length - 1].y * Math.pow(t, _controllerPoints.length - 1);
-	    return {
-	      x: x,
-	      y: y
-	    };
-	  };
-	  that.getStartPos = function () {
-	    return _controllerPoints[0];
-	  };
-	  that.getEndPos = function () {
-	    return _controllerPoints[_controllerPoints.length - 1];
-	  };
-	  return that;
+	  // var _pots = {};
+	  // for (var i = 0 ; i < _controllerPoints.length ; i ++){
+	  //   _pots.push(Point(_controllerPoints[i].x, _controllerPoints[i].y));
+	  // }
+	
+	  function bezier(pots, amount) {
+	    var pot;
+	    var lines;
+	    var ret = [];
+	    var points;
+	    for (var i = 0; i <= amount; i++) {
+	      points = pots.slice(0);
+	      lines = [];
+	      while (pot = points.shift()) {
+	        if (points.length) {
+	          lines.push(pointLine([pot, points[0]], i / amount));
+	        } else if (lines.length > 1) {
+	          points = lines;
+	          lines = [];
+	        } else {
+	          break;
+	        }
+	      }
+	      ret.push(lines[0]);
+	    }
+	    function pointLine(points, rate) {
+	      var pointA, pointB, pointDistance, xDistance, yDistance, tan, radian, tmpPointDistance;
+	      var ret = [];
+	      pointA = points[0];
+	      pointB = points[1];
+	      xDistance = pointB.x - pointA.x;
+	      yDistance = pointB.y - pointA.y;
+	      pointDistance = Math.pow(Math.pow(xDistance, 2) + Math.pow(yDistance, 2), 1 / 2);
+	      tan = yDistance / xDistance;
+	      radian = Math.atan(tan);
+	      tmpPointDistance = pointDistance * rate;
+	      ret = {
+	        x: pointA.x + tmpPointDistance * Math.cos(radian),
+	        y: pointA.y + tmpPointDistance * Math.sin(radian)
+	      };
+	      return ret;
+	    }
+	    return ret;
+	  }
+	  return bezier(_controllerPoints, count);
 	};
 	exports.default = Bezier;
 
@@ -14355,7 +14374,6 @@
 	  var _event = spec.event;
 	  var imageStr = "";
 	  var _targetPos = undefined;
-	  var _reciveMessageTime = 0;
 	  if (_global2.default.playerData.uid === spec.uid) {
 	    imageStr = _resources2.default.bq04;
 	  } else {
@@ -14391,7 +14409,7 @@
 	  };
 	
 	  var updatePositionInfo = function updatePositionInfo(data) {
-	    _reciveMessageTime = 0; //一旦收到服务器数据， 这个值就是0；
+	    // console.log("data = " + JSON.stringify(data));
 	    var time = data.time;
 	    var list = data.data;
 	    var nowTime = new Date().getTime();
@@ -14403,11 +14421,12 @@
 	        var position = playerData.position;
 	        var direction = playerData.direction;
 	        var bezier = playerData.bezier;
+	        var lineList = playerData.lineList;
 	        var pointList = playerData.pointList;
 	        _targetPos = (0, _imports.Vec2)(position.x, position.y).add((0, _imports.Vec2)(direction.x, direction.y).multValue(disTime * 0.2));
 	        _debugHead.position = position;
 	        renderBezier(bezier);
-	        renderDebugLine(pointList);
+	        renderList(lineList);
 	      }
 	    }
 	
@@ -14443,38 +14462,49 @@
 	  that.node.addChild(debugGra);
 	  debugGra.lineStyle(20, 0xFF00FF, 0.8);
 	
+	  var renderList = function renderList(list) {
+	    // console.log("render list = " + JSON.stringify(list));
+	    for (var _i = 0; _i < list.length; _i++) {
+	      var line = (0, _imports.Line)(list[_i].k, list[_i].b);
+	      // console.log("line k = " + line.k);
+	      // console.log("line b = " + line.b);
+	      for (var _i = 0; _i < 40; _i++) {
+	        var x = _i * 10;
+	        var y = line.getYWithX(x);
+	        if (_i === 0) {
+	          debugGra.moveTo(x, y);
+	        } else {
+	          debugGra.lineTo(x, y);
+	        }
+	      }
+	    }
+	  };
 	  var renderBezier = function renderBezier(data) {
 	    // console.log("bezier = " + JSON.stringify(data));
 	
 	    graphics.clear();
 	    graphics.lineStyle(10, 0xFF0000, 0.8);
-	    var bezier = (0, _imports.Bezier)(data);
+	    var bezierPoints = (0, _imports.Bezier)(data, 100);
 	
-	    // console.log("bezier")
-	    for (var i = 0; i < 100; i++) {
-	      var point = bezier.getPoint(i * 0.01);
-	      console.log("point = " + JSON.stringify(point));
+	    for (var i = 0; i < bezierPoints.length; i++) {
 	      if (i === 0) {
-	        graphics.moveTo(point.x, point.y);
+	        graphics.moveTo(bezierPoints[i].x, bezierPoints[i].y);
+	      } else {
+	        graphics.lineTo(bezierPoints[i].x, bezierPoints[i].y);
 	      }
-	      graphics.lineTo(point.x, point.y);
-	      // console.log("point = " + JSON.stringify(point));
 	    }
-	    // graphics.lineTo(_targetPos.x, _targetPos.y);
-	    // var p1 = bezier.getPoint(0);
-	    // var p2 = bezier.getPoint(1);
-	    // console.log("p1 = " + JSON.stringify(p1));
-	    // console.log("p2 = " + JSON.stringify(p2));
-	    // graphics.moveTo(bezier.getStartPos().x, bezier.getStartPos().y);
-	    // graphics.lineTo(bezier.getEndPos().x, bezier.getEndPos().y);
+	    // console.log("bezier = " + JSON.stringify(bezier));
+	    // console.log("bezier")
+	    // for (var i = 0 ; i < 100 ; i ++){
+	    //   let point = bezier.getPoint(i  * 0.01);
+	    //   console.log("point = " + JSON.stringify(point));
+	    //   if (i === 0){
+	    //     graphics.moveTo(point.x, point.y);
 	    //
-	    // debugGra.moveTo(p1.x, p1.y);
-	    // debugGra.lineTo(p2.x, p2.y);
-	  };
-	
-	  var renderDebugLine = function renderDebugLine(pointList) {
-	    // debugGra.moveTo(pointList[0].x, pointList[0].y);
-	    // debugGra.lineTo(pointList[1].x, pointList[1].y);
+	    //   }
+	    //   graphics.lineTo(point.x, point.y);
+	    //   // console.log("point = " + JSON.stringify(point));
+	    // }
 	  };
 	
 	  return that;
@@ -14564,6 +14594,80 @@
 	  return that;
 	};
 	exports.default = JoyStrick;
+
+/***/ },
+/* 383 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+	
+	/**
+	 * Created by chuhaoyuan on 2017/8/17.
+	 */
+	var Line = function Line() {
+	  var that = {};
+	  var p1 = arguments[0];
+	  var p2 = arguments[1];
+	
+	  var _k = undefined;
+	  var _b = undefined;
+	
+	  var initWithKB = function initWithKB(k, b) {
+	    _k = k;
+	    _b = b;
+	  };
+	
+	  var initWithKPoint = function initWithKPoint(k, point) {
+	    _k = k;
+	    _b = point.x * k - point.y;
+	  };
+	
+	  var initWithPoints = function initWithPoints(p1, p2) {
+	    _k = (p1.y - p2.y) / (p1.x - p2.x);
+	    _b = p1.x * _k - p1.y;
+	  };
+	  if (typeof p1 === 'number' && typeof p2 === 'number') {
+	    initWithKB(p1, p2);
+	  } else if (typeof p1 === 'number' && (typeof p2 === 'undefined' ? 'undefined' : _typeof(p2)) === 'object') {
+	    initWithKPoint(p1, p2);
+	  } else if ((typeof p1 === 'undefined' ? 'undefined' : _typeof(p1)) === 'object' && (typeof p2 === 'undefined' ? 'undefined' : _typeof(p2)) === 'object') {
+	    initWithPoints(p1, p2);
+	  }
+	
+	  //
+	  // console.log("p1 = " + JSON.stringify(p1));
+	  // console.log("p2 = " + JSON.stringify(p2));
+	  // console.log("k = " + _k);
+	  // console.log("b = " + _b);
+	
+	
+	  Object.defineProperty(that, "k", {
+	    get: function get() {
+	      return _k;
+	    }
+	  });
+	  Object.defineProperty(that, "b", {
+	    get: function get() {
+	      return _b;
+	    }
+	  });
+	
+	  that.getXWithY = function (y) {
+	    return (y - _b) / _k;
+	  };
+	  that.getYWithX = function (x) {
+	    return _k * x + _b;
+	  };
+	
+	  return that;
+	};
+	exports.default = Line;
 
 /***/ }
 /******/ ]);

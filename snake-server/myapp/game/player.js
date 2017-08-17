@@ -12,16 +12,33 @@ const Player = function (id , socket,event) {
   var _length = 100;
   var _lineList = [];
   var _position = {
-    x: Math.random() * 754,
-    y: Math.random() * 480
+    x: Math.random() * 200 ,
+    y: Math.random() * 200
   };
   var _direction = Vec2(Math.random() * 100, Math.random() * 100).getNormal();
 
-  var startPos = _position;
-  var endPos = Vec2(_position.x, _position.y).add(_direction.multValue(100));
+  var startPos = {x: 0, y : 0};
+  var endPos = {x: 100, y: 100};
 
+  _position = startPos;
 
   var _pointList = [startPos, endPos];
+
+
+  that.getLineList = function () {
+    return _lineList;
+  };
+  that.getLineKBList = function () {
+    var list = [];
+    for (var i = 0 ; i < _lineList.length ; i ++){
+      list.push({
+        k: _lineList[i].k,
+        b: _lineList[i].b
+      })
+    }
+    return list;
+  };
+
   that.getPointList = function () {
     return _pointList;
   };
@@ -41,7 +58,7 @@ const Player = function (id , socket,event) {
   _socket.on("direction", function (direction) {
     //收到方向
     // console.log("收到客户端发来的方向" + JSON.stringify(direction));
-    // _direction = direction;
+    _direction = direction;
     // //更改变一定的角度 ，增加一个直线
     // // console.log("_lineList length = " + JSON.stringify(_lineList.length));
     // // 如果当前的斜率与直线列表里面最后一根直线的斜率有一定的偏差，就直接创建一根新的直线
@@ -54,7 +71,7 @@ const Player = function (id , socket,event) {
     // if (Math.abs(k - dk) > 1){
     //   //创建一个直线
     //   console.log("创建一条直线");
-    //   _lineList.push(Line(dk, _position));
+    //   // _lineList.push(Line(dk, _position));
     // }
 
 
@@ -110,6 +127,7 @@ const Player = function (id , socket,event) {
 
     // _position = Vec2(_position.x, _position.y).add(Vec2(_direction.x, _direction.y).multValue(dt * 0.2));
     //先不要加
+
 
   };
 

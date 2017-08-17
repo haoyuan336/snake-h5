@@ -54,7 +54,8 @@ const Room = function () {
         position: _playerList[i].getPosition(),
         direction: _playerList[i].getDirection(),
         bezier: _playerList[i].getBezier(),
-        pointList: _playerList[i].getPointList()
+        pointList: _playerList[i].getPointList(),
+        lineList: _playerList[i].getLineKBList()
       })
     }
     _event.fire("update_position_info", {

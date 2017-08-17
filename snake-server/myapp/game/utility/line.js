@@ -2,28 +2,37 @@
  * Created by chuhaoyuan on 2017/8/16.
  */
 const Line = function () {
-  console.log("argumen =" + JSON.stringify(arguments));
   var that = {};
   var _k = undefined;
   var _b = undefined;
 
-  //判断是由斜率加点的形式创建的曲线还是直接两个点创建的曲线公式
   var p1 = arguments[0];
   var p2 = arguments[1];
-  console.log("type = " + typeof (p1));
-  console.log("type = " + typeof (p2));
-  if (typeof (p1) === "number"){
-    console.log("是由斜率创建的");
+
+  const initWithKB = function (k , b) {
+
+  };
+  const initWithKPoint = function (k, point) {
+
+  };
+  const initWithPoints = function (p1, p2) {
+
+  };
+
+  if (typeof (p1) === 'number' && typeof (p2) === 'nubmer'){
     _k = p1;
-    // y = k * x + b;
+    _b = p2;
+  }else if(typeof (p1) === "number" && typeof (p2) === "object"){
+    _k = p1;
+    _b = p2.x * k - p2.y;
+  }else if(typeof (p1) === 'object' && typeof (p2) === "object"){
+    _k = (p1.y - p2.y) / (p1.x - p2.x);
+    console.log("k = " + _k);
+    _b = p2.x * _k - p1.y;
+    console.log("b = " + _b);
   }
-  if (typeof (p1) === "object"){
-    _k = (p2.y - p1.y) / (p2.x - p1.x); // 斜率
-    console.log("是由两点创建的" + _k);
 
-  }
 
-  _b = _k * p2.x - p2.y;
 
   that.getCrossPoint = function (line) {
 
@@ -51,6 +60,10 @@ const Line = function () {
       return _b;
     }
   });
+
+
+
+
   return that;
 };
 module.exports = Line;
